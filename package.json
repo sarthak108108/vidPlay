@@ -1,0 +1,15 @@
+{
+  "name": "vidplay",
+  "version": "1.0.0",
+  "description": "a backend for vidPlay",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "javascript",
+    "backend"
+  ],
+  "author": "Sarthak Arora",
+  "license": "ISC"
+}
