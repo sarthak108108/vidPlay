@@ -67,9 +67,9 @@ UserSchema.methods.generateAccessToken = async function(){
         username: this.username,
         fullName: this.fullName
     },
-    process.env.ACCESS_TOKEM_SECRET,
+    process.env.ACCESS_TOKEN_SECRET,
     {
-        expiresIn: process.env.ACCESS_TOKEM_EXPIRY
+        expiresIn: process.env.ACCESS_TOKEN_EXPIRY
     }
 )
 }
@@ -77,9 +77,9 @@ UserSchema.methods.generateRefreshToken = async function(){
     jwt.sign({
         _id: this._id,
     },
-    process.env.REFRESH_TOKEM_SECRET,
+    process.env.REFRESH_TOKEN_SECRET,
     {
-        expiresIn: process.env.REFRESH_TOKEM_EXPIRY
+        expiresIn: process.env.REFRESH_TOKEN_EXPIRY
     }
 )
 }
