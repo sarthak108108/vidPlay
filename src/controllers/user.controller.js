@@ -3,12 +3,19 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.service.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import jwt from "jsonwebtoken";
+
+//Global const
+const options = {
+    httpOnly: true,
+    secure: true
+}
 
 const generateAccessAndRefreshToken = async (userId) => {
     try {
         const user = await User.findById(userId)
         const accessToken = user.generateAccessToken()
-        const refreshToken = user.generateAccessToken()
+        const refreshToken = user.generateRefreshToken()
 
         user.refreshToken = refreshToken
         user.save({ validateBeforeSave: false })
@@ -119,11 +126,8 @@ const userLogin = asyncHandler(async (req, res) => {
 
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id)
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
+    console.log(refreshToken, accessToken)
 
-    const options = {
-        httpOnly: true,
-        secure: true
-    }
 
     res.status(200)
         .cookie("accessToken", accessToken, options)
@@ -152,10 +156,6 @@ const logoutUser = asyncHandler(async (req, res) => {
             new: true
         }
     )
-    const options = {
-        httpOnly: true,
-        secure: true
-    }
 
     return res
         .status(200)
@@ -166,8 +166,50 @@ const logoutUser = asyncHandler(async (req, res) => {
         )
 })
 
+const refreshAccessToken = asyncHandler(async(req, res) => {
+    //request refresh token from user (Cookies)
+    //run a databse call and get refresh token from user schema
+    //compare the two and if refresh token from user and db matches run generateaccessandrefreshtoken
+    //send new cookies
+
+    try {
+        const userRefreshToken = req.cookies?.refreshToken || req.body?.refreshToken    //request refresh token from user (Cookies)
+    
+    
+        if(!userRefreshToken){
+            throw new ApiError(401, "Unauthorised Request")
+        }
+    
+        const refrenceRefreshToken = jwt.verify(userRefreshToken, process.env.REFRESH_TOKEN_SECRET)
+    
+        const user = await User.findById(refrenceRefreshToken._id)    //run a databse call and get refresh token from user schema
+    
+        if(!user){
+            throw new ApiError(404, "User not found")
+        }
+    
+        if(userRefreshToken !== user?.refreshToken){
+            throw new ApiError(401, "Token already used/expired")
+        }
+    
+        const {accessToken, refreshToken} = await generateAccessAndRefreshToken(user._id)    //compare the two and if refresh token from user and db matches run generateaccessandrefreshtoken
+    
+    
+        return res    //send new cookies
+        .status(200)
+        .cookie("accessToken",accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(200,{
+            accessToken, refreshToken
+        }, "accessToken refreshed")
+    } catch (error) {
+        throw new ApiError(500, "Internal Server Error")
+    }
+})
+
 export {
     registerUser,
     userLogin,
-    logoutUser
+    logoutUser,
+    refreshAccessToken
 }
