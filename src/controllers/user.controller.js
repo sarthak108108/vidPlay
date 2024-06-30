@@ -257,9 +257,10 @@ const updateUser = asyncHandler(async(req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
         req.user?._id,
         {
+            $set: {
             fullName: fullName,
             email: email
-        },
+        }},
         {new: true}
     ).select("-password -refreshToken")
 
@@ -268,6 +269,61 @@ const updateUser = asyncHandler(async(req, res) => {
     .json(new ApiResponse(201, updatedUser, "User details Updated"))
 })
 
+const updateUserAvatar = asyncHandler(async(req, res) => {
+    const avatarLocalPath = req.file?.path
+
+    if(!avatarLocalPath){
+        throw new ApiError(400, "Avatar is missing")
+    }
+
+    const avatar = await uploadOnCloudinary(avatarLocalPath)
+
+    if(!avatar.url){
+        throw new ApiError(400, "Error while uploading avatar")
+    }
+
+    const user = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: {
+                avatar: avatar.url
+            }
+        },
+        {new: true}
+    ).select("-password -refreshToken")
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, user, "Avatar has been updated"))
+})
+
+const updateUserCoverImage = asyncHandler(async(req, res) => {
+    const coverImageLocalPath = req.file?.path
+
+    if(!coverImageLocalPath){
+        throw new ApiError(400, "coverImage is missing")
+    }
+
+    const coverImage = await uploadOnCloudinary(coverImageLocalPath)
+
+    if(!coverImage.url){
+        throw new ApiError(400, "Error while uploading coverImage")
+    }
+
+    const user = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: {
+                coverImage: coverImage.url
+            }
+        },
+        {new: true}
+    ).select("-password -refreshToken")
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, user, "coverImage has been updated"))
+})
 
 export {
     registerUser,
@@ -276,5 +332,7 @@ export {
     refreshAccessToken,
     changePassword,
     getCurrentUser,
-    updateUser
+    updateUser,
+    updateUserAvatar,
+    updateUserCoverImage
 }
