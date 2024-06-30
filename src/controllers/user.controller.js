@@ -207,9 +207,40 @@ const refreshAccessToken = asyncHandler(async(req, res) => {
     }
 })
 
+const changePassword = asyncHandler(async (req, res) => {
+    // take old password new password and confirm password fields from body
+    // validate if newpass and confpass are same
+    // run isPasswordCorrect to compare oldpass and password stored in db
+    // update user.password with newpass and save
+    // return a response
+
+    const {oldPass, newPass, confPass} = req.body
+
+    if (newPass !== confPass){
+        throw new ApiError(409, "New password and Confirm password must be same")
+    }
+
+    const user = await User.findById(req.user?._id)
+
+    const passwordCompare = await user.isPasswordCorrect(oldPass)
+
+    if(!passwordCompare){
+        throw new ApiError(409, "Invalid old password")
+    }
+
+    user.password = newPass
+    await user.save({validateBeforeSave: false})
+
+    return res
+    .status(200)
+    .json(new ApiResponse(201, {passwordCompare}, "Password changed successfully"))
+
+})
+
 export {
     registerUser,
     userLogin,
     logoutUser,
-    refreshAccessToken
+    refreshAccessToken,
+    changePassword
 }
