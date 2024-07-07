@@ -198,9 +198,9 @@ const refreshAccessToken = asyncHandler(async(req, res) => {
         .status(200)
         .cookie("accessToken",accessToken, options)
         .cookie("refreshToken", refreshToken, options)
-        .json(200,{
+        .json(new ApiResponse(200,{
             accessToken, refreshToken
-        }, "accessToken refreshed")
+        }, "accessToken refreshed"))
     } catch (error) {
         throw new ApiError(500, "Internal Server Error")
     }
@@ -269,7 +269,7 @@ const updateUser = asyncHandler(async(req, res) => {
 })
 
 const updateUserAvatar = asyncHandler(async(req, res) => {
-    const avatarLocalPath = req.file?.path
+    const avatarLocalPath = req?.file?.path
 
     if(!avatarLocalPath){
         throw new ApiError(400, "Avatar is missing")
@@ -288,7 +288,7 @@ const updateUserAvatar = asyncHandler(async(req, res) => {
                 avatar: avatar.url
             }
         },
-        {new: true}
+        {returnOriginal: false}
     ).select("-password -refreshToken")
 
     return res
@@ -297,7 +297,7 @@ const updateUserAvatar = asyncHandler(async(req, res) => {
 })
 
 const updateUserCoverImage = asyncHandler(async(req, res) => {
-    const coverImageLocalPath = req.file?.path
+    const coverImageLocalPath = await req.file?.path
 
     if(!coverImageLocalPath){
         throw new ApiError(400, "coverImage is missing")
