@@ -20,7 +20,7 @@ app.use(express.static("public"))
 
 app.use(cookieParser())
 
-//importing userRegister and router
+//importing userRouter
 
 import userRouter from "./routes/user.routes.js"
 
@@ -29,5 +29,13 @@ import userRouter from "./routes/user.routes.js"
 app.use("/users", userRouter)
 
 //  http://localhost:5000/users/register
+
+//videoRouter
+
+import videoRouter from "./routes/video.routes.js"
+
+// routes declaration
+
+app.use("/videos", videoRouter)
 
 export { app }
