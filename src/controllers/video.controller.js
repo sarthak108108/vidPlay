@@ -52,18 +52,23 @@ const videoUpload = asyncHandler(async (req, res) => {
 
 })
 
-// unpublishing a video
 
 const switchVideoPrivacy = asyncHandler(async (req, res) => {
 
     try {
         const { videoId } = req.params
 
+        const video = await Video.findById(videoId)
+        const user = await User.findById(req.user._id)
+        const publisher = await User.findById(video.videoPublisher)
+
+        if(!(publisher.username == user.username)){
+            throw new ApiError(400, "User is not videoPublisher")
+        }
+
         if (!videoId) {
             throw new ApiError(400, "file not selected")
         }
-
-        const video = await Video.findById(videoId)
 
         if (!video) {
             throw new ApiError(404, "File not found")
@@ -96,18 +101,6 @@ const switchVideoPrivacy = asyncHandler(async (req, res) => {
     } catch (error) {
         throw new ApiError(500, "error while updating")
     }
-})
-
-const updateVideoFields = asyncHandler(async (req, res) => {
-    // get updated feilds from user and video url
-    // get video url to search for video document in videos model
-    // update feilds and save
-})
-
-const deleteVideo = asyncHandler(async (req, res) => {
-    // get video url from user
-    // find video document with url
-    // delete document using id
 })
 
 const getVideo = asyncHandler(async (req,res) => {
@@ -155,7 +148,5 @@ const getVideo = asyncHandler(async (req,res) => {
 export {
     videoUpload,
     switchVideoPrivacy,
-    updateVideoFields,
-    deleteVideo,
     getVideo
 }
