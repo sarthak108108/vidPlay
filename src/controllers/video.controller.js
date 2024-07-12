@@ -3,8 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Video } from "../models/video.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.service.js";
-import { User } from "../models/user.model.js";
-import { PassThrough } from "stream";
+import { User } from "../models/user.model.js"
 
 
 // req.files using multer and get the local path of file using video[0].path and thumbnail
