@@ -166,8 +166,6 @@ const updateVideoFields = asyncHandler(async (req, res) => {
         throw new ApiError(401, "title cant be empty")
     }
 
-    console.log(title, description)
-
     await Video.findByIdAndUpdate(
         videoId,
         {
