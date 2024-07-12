@@ -183,11 +183,27 @@ const updateVideoFields = asyncHandler(async (req, res) => {
     .status(200)
     .json( new ApiResponse(200, {}, "video fields update"))
 
-}) 
+})
+
+const deleteVideo = asyncHandler(async(req, res) => {
+    const { videoId } = req.params
+    const isAuthorised = await isVideoPublisher(videoId, req.user._id)
+
+    if (!isAuthorised) {
+        throw new ApiError(400, "unauthorised request")
+    }
+
+    await Video.findByIdAndDelete(videoId)
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Video deleted successfully"))
+})
 
 export {
     videoUpload,
     switchVideoPrivacy,
     getVideo,
-    updateVideoFields
+    updateVideoFields,
+    deleteVideo
 }
