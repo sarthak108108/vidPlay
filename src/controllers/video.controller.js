@@ -11,6 +11,13 @@ import { User } from "../models/user.model.js"
 // also save fields like title, description, duration(cloudinay object), views(mongo pipelines), isPublished(boolean), videoPublisher(req.user)
 // get the url from cloudinary and save it in video.url and thumbnail url , save rest of the feilds in video model using Video.create
 
+const isVideoPublisher = async (videoId, userId) => {
+    const publisher = await User.findById((await Video.findById(videoId)).videoPublisher)
+    const user = await User.findById(userId)
+
+    return (publisher.username == user.username)
+}
+
 const videoUpload = asyncHandler(async (req, res) => {
     const { title, description, isPublished } = req.body
 
@@ -58,11 +65,11 @@ const switchVideoPrivacy = asyncHandler(async (req, res) => {
         const { videoId } = req.params
 
         const video = await Video.findById(videoId)
-        const user = await User.findById(req.user._id)
-        const publisher = await User.findById(video.videoPublisher)
+        
+        const isAuthorised = await isVideoPublisher(videoId, req.user._id)
 
-        if(!(publisher.username == user.username)){
-            throw new ApiError(400, "User is not videoPublisher")
+        if (!isAuthorised){
+            throw new ApiError(400, "unauthorised request")
         }
 
         if (!videoId) {
@@ -144,8 +151,45 @@ const getVideo = asyncHandler(async (req,res) => {
     
 })
 
+const updateVideoFields = asyncHandler(async (req, res) => {
+    const { videoId } = req.params
+
+    const isAuthorised = await isVideoPublisher(videoId, req.user._id)
+
+    if(!isAuthorised){
+        throw new ApiError(400, "unauthorised request")
+    }
+
+    const { title, description } = req.body
+
+    if (!title || title === "") {
+        throw new ApiError(401, "title cant be empty")
+    }
+
+    console.log(title, description)
+
+    await Video.findByIdAndUpdate(
+        videoId,
+        {
+            $set: {
+                title: title,
+                description: description
+            }
+        },
+        {
+            new: true
+        }
+    )
+
+    return res
+    .status(200)
+    .json( new ApiResponse(200, {}, "video fields update"))
+
+}) 
+
 export {
     videoUpload,
     switchVideoPrivacy,
-    getVideo
+    getVideo,
+    updateVideoFields
 }
