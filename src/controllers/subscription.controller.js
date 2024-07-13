@@ -1,5 +1,6 @@
 import { Subscription } from "../models/subscription.model.js";
 import { Video } from "../models/video.model.js";
+import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -69,7 +70,29 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 })
 
 const getSubscriptions = asyncHandler(async (req, res) => {
-
+    
+    try {
+        const { channel } = req.params
+        const user = await User.findById(channel)
+    
+        const subscriptions = await Subscription.aggregate([
+            {
+                $match: {
+                    subscriber: user._id
+                }
+            }
+        ])
+    
+        const totalSubscriptions = subscriptions.length
+    
+        console.log(subscriptions, totalSubscriptions, channel)
+    
+        return res
+        .status(200)
+        .json(new ApiResponse(200, {subscriptions,totalSubscriptions}, "subscriptions fetched succesfully"))
+    } catch (error) {
+        throw new ApiError(400, "channel not found")
+    }
 })
 
 const getSubscribers = asyncHandler(async (req, res) => {
@@ -80,7 +103,8 @@ const getSubscribers = asyncHandler(async (req, res) => {
 export {
     toggleSubscription,
     getSubscriptions,
-    getSubscribers
+    getSubscribers,
+    isSubscribed
 
 
 }
