@@ -38,4 +38,12 @@ import videoRouter from "./routes/video.routes.js"
 
 app.use("/videos", videoRouter)
 
+// import likeRouter
+
+import likeRouter from "./routes/like.routes.js"
+
+// like router route declaration
+
+app.use("/likes", likeRouter)
+
 export { app }
