@@ -96,7 +96,26 @@ const getSubscriptions = asyncHandler(async (req, res) => {
 })
 
 const getSubscribers = asyncHandler(async (req, res) => {
-
+    try {
+        const { channel } = req.params
+        const user = await User.findById(channel)
+    
+        const subscribers = await Subscription.aggregate([
+            {
+                $match: {
+                    channel: user._id
+                }
+            }
+        ])
+    
+        const totalSubscribers = subscribers.length
+    
+        return res
+        .status(200)
+        .json(new ApiResponse(200, {totalSubscribers}, "subscribers fetched succesfully"))
+    } catch (error) {
+        throw new ApiError(400, "channel not found")
+    }
 })
 
 
