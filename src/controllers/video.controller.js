@@ -185,6 +185,39 @@ const updateVideoFields = asyncHandler(async (req, res) => {
 
 })
 
+const updateVideoThumbNail = asyncHandler(async (req, res) => {
+    const thumbNailPath = req?.file?.path
+    const { videoId } = req.params
+
+    if(!thumbNailPath){
+        throw new ApiError(404, "thumbnail required")
+    }
+
+    const thumbNail = await uploadOnCloudinary(thumbNailPath)
+
+    if (!thumbNail.url){
+        throw new ApiError(500, "error occured while uploading")
+    }
+
+    console.log(thumbNail.url)
+
+    await Video.findByIdAndUpdate(
+        videoId,
+        {
+            $set: {
+                thumbNail: thumbNail.url
+            }
+        },
+        {
+            new: true
+        }
+    )
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "thumbnail changed"))
+})
+
 const deleteVideo = asyncHandler(async(req, res) => {
     const { videoId } = req.params
     const isAuthorised = await isVideoPublisher(videoId, req.user._id)
@@ -205,5 +238,6 @@ export {
     switchVideoPrivacy,
     getVideo,
     updateVideoFields,
-    deleteVideo
+    deleteVideo,
+    updateVideoThumbNail
 }
