@@ -46,4 +46,12 @@ import likeRouter from "./routes/like.routes.js"
 
 app.use("/likes", likeRouter)
 
+// import subscription router
+
+import subscriptionRouter from "./routes/subscription.routes.js"
+
+// subscription router route declaration
+
+app.use("/subscriptions", subscriptionRouter)
+
 export { app }
