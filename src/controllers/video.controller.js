@@ -110,7 +110,7 @@ const switchVideoPrivacy = asyncHandler(async (req, res) => {
 })
 
 const getVideo = asyncHandler(async (req,res) => {
-    const { videoId } = req.params
+    const { videoId, likes } = req.params
 
     const user = await User.findById(req.user._id)
     const video = await Video.findById(videoId)
@@ -147,7 +147,7 @@ const getVideo = asyncHandler(async (req,res) => {
 
     return res
     .status(200)
-    .json(new ApiResponse(201, {video, channel}, "success"))
+    .json(new ApiResponse(201, {video, channel, likes}, "success"))
     
 })
 

@@ -63,6 +63,56 @@ const toggleLike = asyncHandler (async( req, res) => {
     }
 })
 
+const getLikedVideos = asyncHandler(async(req, res) => {
+    const userId = req.user._id
+
+    const likedVideos = await Like.aggregate([
+        {
+            $match: {
+                likedBy : userId
+            }
+        }
+    ])
+
+    console.log(likedVideos)
+
+    if(likedVideos.length == 0){
+        return res
+        .status(200)
+        .json({"message": "No liked videos"})
+    } else {
+        return res
+        .status(200)
+        .json(new ApiResponse(200, likedVideos, "liked videos fetched successfully"))
+    }
+})
+
+const getVideoLikes = asyncHandler(async(req, res, next) => {
+    const { videoId } = req.params
+    const video = await Video.findById(videoId)
+
+    const likestemp = await Like.aggregate([
+        {
+            $match: {
+                video: video._id
+            }
+        },
+        {
+            $count: "likes"
+        }
+    ])
+
+    const likes = likestemp[0]
+
+
+    req.params = {likes, videoId}
+    
+    next()
+
+})
+
 export {
-    toggleLike
+    toggleLike,
+    getLikedVideos,
+    getVideoLikes
 }
