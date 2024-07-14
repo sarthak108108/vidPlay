@@ -35,7 +35,7 @@ const videoUpload = asyncHandler(async (req, res) => {
     const thumbNailLocalPath = req?.files?.thumbNail[0]?.path
 
 
-    
+
     const videoFile = await uploadOnCloudinary(videoFileLocalPath);
     const thumbNail = await uploadOnCloudinary(thumbNailLocalPath);
 
@@ -46,6 +46,7 @@ const videoUpload = asyncHandler(async (req, res) => {
         thumbNail: thumbNail.url,
         title,
         description,
+        duration: videoFile.duration,
         isPublished,
         videoPublisher
     })
